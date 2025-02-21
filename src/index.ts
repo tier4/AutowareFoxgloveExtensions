@@ -1,11 +1,11 @@
-import { CubePrimitive, SceneUpdate, SpherePrimitive } from "@foxglove/schemas";
+import { CubePrimitive, SceneUpdate, SpherePrimitive, LinePrimitive, Point3 } from "@foxglove/schemas";
 import { PredictedObjects } from "./PredictedObjects";
 import { TrackedObjects } from "./TrackedObjects";
 import { DetectedObjects } from "./DetectedObjects";
 import { Header } from "./Header";
 import { Position } from "./Position";
 import { Orientation } from "./Orientation";
-import { Dimensions } from "./Dimensions";
+// import { Dimensions } from "./Dimensions";
 import { ExtensionContext } from "@foxglove/studio";
 
 type Color = {
@@ -37,7 +37,8 @@ enum Classification {
   PEDESTRIAN = 7,
 }
 
-function createSceneUpdateMessage(header: Header, spheres: SpherePrimitive[], cubes: CubePrimitive[]): SceneUpdate {
+
+function createSceneUpdateMessage(header: Header, spheres: SpherePrimitive[], cubes: CubePrimitive[], lines: LinePrimitive[]): SceneUpdate {
   return {
     deletions: [],
     entities: [
@@ -50,7 +51,7 @@ function createSceneUpdateMessage(header: Header, spheres: SpherePrimitive[], cu
         metadata: [],
         arrows: [],
         cylinders: [],
-        lines: [],
+        lines: lines,
         spheres: spheres,
         texts: [],
         triangles: [],
@@ -61,33 +62,33 @@ function createSceneUpdateMessage(header: Header, spheres: SpherePrimitive[], cu
   };
 }
 
-function createCubePrimitive(x: number, y:number, position: Position, orientation: Orientation, color: Color, dimensions: Dimensions): CubePrimitive
-{
-  return {
-    color,
-    size: { x, y, z: 0.1 },
-    pose: {
-      position: {
-        x: position.x,
-        y: position.y,
-        // make the cube start at the ground level (z = 0)
-        z: position.z - 0.5 * dimensions.z,
-      },
-      orientation,
-    },
-  };
-}
+// function createCubePrimitive(x: number, y:number, z: number, position: Position, orientation: Orientation, color: Color, dimensions: Dimensions): CubePrimitive
+// {
+//   return {
+//     color,
+//     size: { x, y, z},
+//     pose: {
+//       position: {
+//         x: position.x,
+//         y: position.y,
+//         // make the cube start at the ground level (z = 0)
+//         z: position.z - 0.5 * dimensions.z,
+//       },
+//       orientation,
+//     },
+//   };
+// }
 
 function convertDetectedObjects(msg: DetectedObjects): SceneUpdate 
 {
   const { header, objects } = msg;
 
-  const cubePrimitives: CubePrimitive[] = objects.reduce((acc: CubePrimitive[], object) => {
+  const linePrimitives: LinePrimitive[] = objects.reduce((acc: LinePrimitive[], object) => {
     const { kinematics, shape, classification } = object;
     const { pose_with_covariance } = kinematics;
     const { position, orientation } = pose_with_covariance.pose;
     const { dimensions } = shape;
-    const { x, y } = dimensions;
+    const { x, y, z } = dimensions;
 
     if (
       classification.length === 0 ||
@@ -100,25 +101,64 @@ function convertDetectedObjects(msg: DetectedObjects): SceneUpdate
     const { label } = classification[0];
     const color = colorMap[label as keyof typeof colorMap] ?? { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
 
-    const predictedObjectCube: CubePrimitive = createCubePrimitive(x, y, position, orientation, color, dimensions);
+    const predictedObjectLine: LinePrimitive = createLinePrimitive(x, y, z, position, orientation, color);
 
-    acc.push(predictedObjectCube);
+    acc.push(predictedObjectLine);
     return acc;
   }, []);
 
-  return createSceneUpdateMessage(header, [], cubePrimitives);
+  return createSceneUpdateMessage(header, [], [], linePrimitives);
 }
+
+
+function createLinePrimitive(x: number, y: number, z: number, position: Position, orientation: Orientation, color: Color): LinePrimitive {
+  const halfX = x / 2;
+  const halfY = y / 2;
+  const halfZ = z / 2;
+
+  const points: Point3[] = [
+    { x: -halfX, y: -halfY, z: -halfZ },
+    { x: halfX, y: -halfY, z: -halfZ },
+    { x: halfX, y: halfY, z: -halfZ },
+    { x: -halfX, y: halfY, z: -halfZ },
+    { x: -halfX, y: -halfY, z: halfZ },
+    { x: halfX, y: -halfY, z: halfZ },
+    { x: halfX, y: halfY, z: halfZ },
+    { x: -halfX, y: halfY, z: halfZ },
+  ];
+
+  const indices = [
+    0, 1, 1, 2, 2, 3, 3, 0,
+    4, 5, 5, 6, 6, 7, 7, 4,
+    0, 4, 1, 5, 2, 6, 3, 7
+  ];
+
+  return {
+    type: 0,
+    pose: {
+      position,
+      orientation,
+    },
+    thickness: 0.1,
+    scale_invariant: false,
+    points: points,
+    color: color,
+    indices: indices,
+    colors:[]
+  };
+}
+
 
 function convertTrackedObjects(msg: TrackedObjects): SceneUpdate 
 {
   const { header, objects } = msg;
 
-  const cubePrimitives: CubePrimitive[] = objects.reduce((acc: CubePrimitive[], object) => {
+  const linePrimitives: LinePrimitive[] = objects.reduce((acc: LinePrimitive[], object) => {
     const { kinematics, shape, classification } = object;
     const { pose_with_covariance } = kinematics;
     const { position, orientation } = pose_with_covariance.pose;
     const { dimensions } = shape;
-    const { x, y } = dimensions;
+    const { x, y, z } = dimensions;
 
     if (
       classification.length === 0 ||
@@ -131,13 +171,13 @@ function convertTrackedObjects(msg: TrackedObjects): SceneUpdate
     const { label } = classification[0];
     const color = colorMap[label as keyof typeof colorMap] ?? { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
 
-    const predictedObjectCube: CubePrimitive = createCubePrimitive(x, y, position, orientation, color, dimensions);
+    const linePrimitive: LinePrimitive = createLinePrimitive(x, y, z, position, orientation, color);
 
-    acc.push(predictedObjectCube);
+    acc.push(linePrimitive);
     return acc;
   }, []);
 
-  return createSceneUpdateMessage(header, [], cubePrimitives);
+  return createSceneUpdateMessage(header, [], [], linePrimitives);
 }
 
 
@@ -182,12 +222,12 @@ function convertPredictedObjects(msg: PredictedObjects): SceneUpdate
     [],
   );
 
-  const cubePrimitives: CubePrimitive[] = objects.reduce((acc: CubePrimitive[], object) => {
+  const linePrimitives: LinePrimitive[] = objects.reduce((acc: LinePrimitive[], object) => {
     const { kinematics, shape, classification } = object;
     const { initial_pose_with_covariance } = kinematics;
     const { position, orientation } = initial_pose_with_covariance.pose;
     const { dimensions } = shape;
-    const { x, y } = dimensions;
+    const { x, y, z  } = dimensions;
 
     if (
       classification.length === 0 ||
@@ -200,13 +240,13 @@ function convertPredictedObjects(msg: PredictedObjects): SceneUpdate
     const { label } = classification[0];
     const color = colorMap[label as keyof typeof colorMap] ?? { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
 
-    const predictedObjectCube: CubePrimitive = createCubePrimitive(x, y, position, orientation, color, dimensions);
+    const predictedObjectLine: LinePrimitive = createLinePrimitive(x, y, z, position, orientation, color);
 
-    acc.push(predictedObjectCube);
+    acc.push(predictedObjectLine);
     return acc;
   }, []);
 
-  return createSceneUpdateMessage(header, spherePrimitives, cubePrimitives);
+  return createSceneUpdateMessage(header, spherePrimitives, [], linePrimitives);
 }
 
 
