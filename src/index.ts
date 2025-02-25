@@ -139,7 +139,7 @@ function createLinePrimitive(x: number, y: number, z: number, position: Position
       position,
       orientation,
     },
-    thickness: 0.1,
+    thickness: 0.05,
     scale_invariant: false,
     points: points,
     color: color,
