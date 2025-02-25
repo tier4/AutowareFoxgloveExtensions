@@ -1,4 +1,4 @@
-import { CubePrimitive, SceneUpdate, SpherePrimitive, LinePrimitive, Point3 } from "@foxglove/schemas";
+import { CubePrimitive, SceneUpdate, SpherePrimitive, LinePrimitive, Point3, TextPrimitive } from "@foxglove/schemas";
 import { PredictedObjects } from "./PredictedObjects";
 import { TrackedObjects } from "./TrackedObjects";
 import { DetectedObjects } from "./DetectedObjects";
@@ -37,8 +37,18 @@ enum Classification {
   PEDESTRIAN = 7,
 }
 
+const labelToClassification: string[] = [
+  "unknown",    // 0
+  "car",        // 1
+  "bicycle",    // 2
+  "bus",        // 3
+  "truck",      // 4
+  "cyclist",    // 5
+  "motorcycle", // 6
+  "pedestrian", // 7
+];
 
-function createSceneUpdateMessage(header: Header, spheres: SpherePrimitive[], cubes: CubePrimitive[], lines: LinePrimitive[]): SceneUpdate {
+function createSceneUpdateMessage(header: Header, spheres: SpherePrimitive[], cubes: CubePrimitive[], lines: LinePrimitive[], texts: TextPrimitive[]): SceneUpdate {
   return {
     deletions: [],
     entities: [
@@ -53,7 +63,7 @@ function createSceneUpdateMessage(header: Header, spheres: SpherePrimitive[], cu
         cylinders: [],
         lines: lines,
         spheres: spheres,
-        texts: [],
+        texts: texts,
         triangles: [],
         models: [],
         cubes: cubes,
@@ -78,7 +88,16 @@ function createSceneUpdateMessage(header: Header, spheres: SpherePrimitive[], cu
 //     },
 //   };
 // }
-
+function createTextPrimitive( position: Position, orientation: Orientation, label: string): TextPrimitive {
+  return {
+    text: label,
+    color: { r: 1.0, g: 0.0, b: 0.0, a: 0.5 },
+    pose: { position, orientation },
+    billboard: true,
+    font_size: 8.0,
+    scale_invariant: true,
+  };
+}
 function convertDetectedObjects(msg: DetectedObjects): SceneUpdate 
 {
   const { header, objects } = msg;
@@ -98,20 +117,38 @@ function convertDetectedObjects(msg: DetectedObjects): SceneUpdate
       return acc;
     }
 
-    const { label } = classification[0];
-    const color = colorMap[label as keyof typeof colorMap] ?? { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
 
-    const predictedObjectLine: LinePrimitive = createLinePrimitive(x, y, z, position, orientation, color);
-
+    const predictedObjectLine: LinePrimitive = createLinePrimitive(x, y, z, position, orientation);
+    
     acc.push(predictedObjectLine);
     return acc;
   }, []);
+  
+  const textPrimitives: TextPrimitive[] = objects.reduce((acc: TextPrimitive[], object) => {
+    const { kinematics, classification } = object;
+    const { pose_with_covariance } = kinematics;
+    const { position, orientation } = pose_with_covariance.pose;
 
-  return createSceneUpdateMessage(header, [], [], linePrimitives);
+    if (
+      classification.length === 0 ||
+      !classification[0] ||
+      classification[0].label === undefined
+    ) {
+      return acc;
+    }
+
+    const label = labelToClassification[classification[0].label] || "unknown";
+
+    const predictedLabel: TextPrimitive = createTextPrimitive(position, orientation, label);
+    
+    acc.push(predictedLabel);
+    return acc;
+  }, []);
+  return createSceneUpdateMessage(header, [], [], linePrimitives, textPrimitives);
 }
 
 
-function createLinePrimitive(x: number, y: number, z: number, position: Position, orientation: Orientation, color: Color): LinePrimitive {
+function createLinePrimitive(x: number, y: number, z: number, position: Position, orientation: Orientation): LinePrimitive {
   const halfX = x / 2;
   const halfY = y / 2;
   const halfZ = z / 2;
@@ -142,7 +179,7 @@ function createLinePrimitive(x: number, y: number, z: number, position: Position
     thickness: 0.05,
     scale_invariant: false,
     points: points,
-    color: color,
+    color: { r: 0.0, g: 0.0, b: 1.0, a: 1.0 },
     indices: indices,
     colors:[]
   };
@@ -168,16 +205,13 @@ function convertTrackedObjects(msg: TrackedObjects): SceneUpdate
       return acc;
     }
 
-    const { label } = classification[0];
-    const color = colorMap[label as keyof typeof colorMap] ?? { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
-
-    const linePrimitive: LinePrimitive = createLinePrimitive(x, y, z, position, orientation, color);
+    const linePrimitive: LinePrimitive = createLinePrimitive(x, y, z, position, orientation);
 
     acc.push(linePrimitive);
     return acc;
   }, []);
 
-  return createSceneUpdateMessage(header, [], [], linePrimitives);
+  return createSceneUpdateMessage(header, [], [], linePrimitives, []);
 }
 
 
@@ -237,16 +271,14 @@ function convertPredictedObjects(msg: PredictedObjects): SceneUpdate
       return acc;
     }
 
-    const { label } = classification[0];
-    const color = colorMap[label as keyof typeof colorMap] ?? { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
 
-    const predictedObjectLine: LinePrimitive = createLinePrimitive(x, y, z, position, orientation, color);
+    const predictedObjectLine: LinePrimitive = createLinePrimitive(x, y, z, position, orientation);
 
     acc.push(predictedObjectLine);
     return acc;
   }, []);
 
-  return createSceneUpdateMessage(header, spherePrimitives, [], linePrimitives);
+  return createSceneUpdateMessage(header, spherePrimitives, [], linePrimitives, []);
 }
 
 
