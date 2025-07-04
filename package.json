@@ -4,7 +4,7 @@
   "description": "Support for Autoware in Foxglove Studio",
   "publisher": "tier4",
   "homepage": "https://github.com/tier4/AutowareFoxgloveExtensions",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "license": "Apache-2.0",
   "main": "./dist/extension.js",
   "keywords": [],
