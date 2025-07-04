@@ -1,6 +1,9 @@
 # Node modules
 node_modules/
 
+# Build output
+*.foxe
+
 # Logs
 logs
 *.log
