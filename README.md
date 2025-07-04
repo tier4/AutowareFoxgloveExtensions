@@ -1,4 +1,4 @@
-# AutowareFoxgloveConverter
+# Autoware Foxglove Extensions
 
 Special thanks to [https://github.com/KhalilSelyan/predictedObjectConverter](https://github.com/KhalilSelyan/predictedObjectConverter) for the inspiration and the code to get started.
 
