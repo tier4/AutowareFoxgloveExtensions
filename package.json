@@ -1,11 +1,11 @@
 {
-  "name": "AutowareFoxgloveConverter",
-  "displayName": "AutowareFoxgloveConverter",
-  "description": "",
-  "publisher": "kminoda",
-  "homepage": "",
-  "version": "0.0.0",
-  "license": "UNLICENSED",
+  "name": "autoware-foxglove-extensions",
+  "displayName": "Autoware Foxglove Extensions",
+  "description": "Support for Autoware in Foxglove Studio",
+  "publisher": "tier4",
+  "homepage": "https://github.com/tier4/AutowareFoxgloveExtensions",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
   "main": "./dist/extension.js",
   "keywords": [],
   "scripts": {
