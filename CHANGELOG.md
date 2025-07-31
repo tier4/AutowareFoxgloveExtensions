@@ -1,5 +1,10 @@
 # AutowareFoxgloveConverter version history
 
+## 0.2.0
+
+- Added support for:
+  - [autoware_planning_msgs::msg::Trajectory](https://github.com/autowarefoundation/autoware_msgs/blob/main/autoware_planning_msgs/msg/Trajectory.msg)
+
 ## 0.1.0
 
 - Added support for:

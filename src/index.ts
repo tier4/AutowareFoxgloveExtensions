@@ -1,4 +1,10 @@
-import { CubePrimitive, SceneUpdate, SpherePrimitive } from "@foxglove/schemas";
+import {
+  CubePrimitive,
+  SceneUpdate,
+  SpherePrimitive,
+  PosesInFrame,
+  Pose,
+} from "@foxglove/schemas";
 import { PredictedObjects } from "./PredictedObjects";
 import { TrackedObjects } from "./TrackedObjects";
 import { DetectedObjects } from "./DetectedObjects";
@@ -7,6 +13,7 @@ import { Position } from "./Position";
 import { Orientation } from "./Orientation";
 import { Dimensions } from "./Dimensions";
 import { ExtensionContext } from "@foxglove/studio";
+import { Trajectory } from "./Trajectory";
 
 type Color = {
   r: number;
@@ -37,7 +44,11 @@ enum Classification {
   PEDESTRIAN = 7,
 }
 
-function createSceneUpdateMessage(header: Header, spheres: SpherePrimitive[], cubes: CubePrimitive[]): SceneUpdate {
+function createSceneUpdateMessage(
+  header: Header,
+  spheres: SpherePrimitive[],
+  cubes: CubePrimitive[]
+): SceneUpdate {
   return {
     deletions: [],
     entities: [
@@ -61,8 +72,14 @@ function createSceneUpdateMessage(header: Header, spheres: SpherePrimitive[], cu
   };
 }
 
-function createCubePrimitive(x: number, y:number, position: Position, orientation: Orientation, color: Color, dimensions: Dimensions): CubePrimitive
-{
+function createCubePrimitive(
+  x: number,
+  y: number,
+  position: Position,
+  orientation: Orientation,
+  color: Color,
+  dimensions: Dimensions
+): CubePrimitive {
   return {
     color,
     size: { x, y, z: 0.1 },
@@ -78,71 +95,97 @@ function createCubePrimitive(x: number, y:number, position: Position, orientatio
   };
 }
 
-function convertDetectedObjects(msg: DetectedObjects): SceneUpdate 
-{
+function convertDetectedObjects(msg: DetectedObjects): SceneUpdate {
   const { header, objects } = msg;
 
-  const cubePrimitives: CubePrimitive[] = objects.reduce((acc: CubePrimitive[], object) => {
-    const { kinematics, shape, classification } = object;
-    const { pose_with_covariance } = kinematics;
-    const { position, orientation } = pose_with_covariance.pose;
-    const { dimensions } = shape;
-    const { x, y } = dimensions;
+  const cubePrimitives: CubePrimitive[] = objects.reduce(
+    (acc: CubePrimitive[], object) => {
+      const { kinematics, shape, classification } = object;
+      const { pose_with_covariance } = kinematics;
+      const { position, orientation } = pose_with_covariance.pose;
+      const { dimensions } = shape;
+      const { x, y } = dimensions;
 
-    if (
-      classification.length === 0 ||
-      !classification[0] ||
-      classification[0].label === undefined
-    ) {
+      if (
+        classification.length === 0 ||
+        !classification[0] ||
+        classification[0].label === undefined
+      ) {
+        return acc;
+      }
+
+      const { label } = classification[0];
+      const color = colorMap[label as keyof typeof colorMap] ?? {
+        r: 1.0,
+        g: 1.0,
+        b: 1.0,
+        a: 1.0,
+      };
+
+      const predictedObjectCube: CubePrimitive = createCubePrimitive(
+        x,
+        y,
+        position,
+        orientation,
+        color,
+        dimensions
+      );
+
+      acc.push(predictedObjectCube);
       return acc;
-    }
-
-    const { label } = classification[0];
-    const color = colorMap[label as keyof typeof colorMap] ?? { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
-
-    const predictedObjectCube: CubePrimitive = createCubePrimitive(x, y, position, orientation, color, dimensions);
-
-    acc.push(predictedObjectCube);
-    return acc;
-  }, []);
+    },
+    []
+  );
 
   return createSceneUpdateMessage(header, [], cubePrimitives);
 }
 
-function convertTrackedObjects(msg: TrackedObjects): SceneUpdate 
-{
+function convertTrackedObjects(msg: TrackedObjects): SceneUpdate {
   const { header, objects } = msg;
 
-  const cubePrimitives: CubePrimitive[] = objects.reduce((acc: CubePrimitive[], object) => {
-    const { kinematics, shape, classification } = object;
-    const { pose_with_covariance } = kinematics;
-    const { position, orientation } = pose_with_covariance.pose;
-    const { dimensions } = shape;
-    const { x, y } = dimensions;
+  const cubePrimitives: CubePrimitive[] = objects.reduce(
+    (acc: CubePrimitive[], object) => {
+      const { kinematics, shape, classification } = object;
+      const { pose_with_covariance } = kinematics;
+      const { position, orientation } = pose_with_covariance.pose;
+      const { dimensions } = shape;
+      const { x, y } = dimensions;
 
-    if (
-      classification.length === 0 ||
-      !classification[0] ||
-      classification[0].label === undefined
-    ) {
+      if (
+        classification.length === 0 ||
+        !classification[0] ||
+        classification[0].label === undefined
+      ) {
+        return acc;
+      }
+
+      const { label } = classification[0];
+      const color = colorMap[label as keyof typeof colorMap] ?? {
+        r: 1.0,
+        g: 1.0,
+        b: 1.0,
+        a: 1.0,
+      };
+
+      const predictedObjectCube: CubePrimitive = createCubePrimitive(
+        x,
+        y,
+        position,
+        orientation,
+        color,
+        dimensions
+      );
+
+      acc.push(predictedObjectCube);
       return acc;
-    }
-
-    const { label } = classification[0];
-    const color = colorMap[label as keyof typeof colorMap] ?? { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
-
-    const predictedObjectCube: CubePrimitive = createCubePrimitive(x, y, position, orientation, color, dimensions);
-
-    acc.push(predictedObjectCube);
-    return acc;
-  }, []);
+    },
+    []
+  );
 
   return createSceneUpdateMessage(header, [], cubePrimitives);
 }
 
-
-function convertPredictedObjects(msg: PredictedObjects): SceneUpdate 
-{
+function convertPredictedObjects(msg: PredictedObjects): SceneUpdate {
   const { header, objects } = msg;
 
   // create same thing but with spheres
@@ -160,55 +203,106 @@ function convertPredictedObjects(msg: PredictedObjects): SceneUpdate
       }
 
       const { label } = classification[0];
-      const color = colorMap[label as keyof typeof colorMap] ?? { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
+      const color = colorMap[label as keyof typeof colorMap] ?? {
+        r: 1.0,
+        g: 1.0,
+        b: 1.0,
+        a: 1.0,
+      };
 
       // if the object is not unknown and has a predicted path, draw the path
       if (
         label !== Classification.UNKNOWN &&
         Math.floor(initial_pose_with_covariance.pose.position.x) > 0
       ) {
-        const spherePath: SpherePrimitive[] = predicted_paths[0]!.path.map((pose) => {
-          const sphere: SpherePrimitive = {
-            color,
-            size: { x: 0.25, y: 0.25, z: 0.25 },
-            pose,
-          };
-          return sphere;
-        });
+        const spherePath: SpherePrimitive[] = predicted_paths[0]!.path.map(
+          (pose) => {
+            const sphere: SpherePrimitive = {
+              color,
+              size: { x: 0.25, y: 0.25, z: 0.25 },
+              pose,
+            };
+            return sphere;
+          }
+        );
         acc.push(...spherePath);
       }
       return acc;
     },
-    [],
+    []
   );
 
-  const cubePrimitives: CubePrimitive[] = objects.reduce((acc: CubePrimitive[], object) => {
-    const { kinematics, shape, classification } = object;
-    const { initial_pose_with_covariance } = kinematics;
-    const { position, orientation } = initial_pose_with_covariance.pose;
-    const { dimensions } = shape;
-    const { x, y } = dimensions;
+  const cubePrimitives: CubePrimitive[] = objects.reduce(
+    (acc: CubePrimitive[], object) => {
+      const { kinematics, shape, classification } = object;
+      const { initial_pose_with_covariance } = kinematics;
+      const { position, orientation } = initial_pose_with_covariance.pose;
+      const { dimensions } = shape;
+      const { x, y } = dimensions;
 
-    if (
-      classification.length === 0 ||
-      !classification[0] ||
-      classification[0].label === undefined
-    ) {
+      if (
+        classification.length === 0 ||
+        !classification[0] ||
+        classification[0].label === undefined
+      ) {
+        return acc;
+      }
+
+      const { label } = classification[0];
+      const color = colorMap[label as keyof typeof colorMap] ?? {
+        r: 1.0,
+        g: 1.0,
+        b: 1.0,
+        a: 1.0,
+      };
+
+      const predictedObjectCube: CubePrimitive = createCubePrimitive(
+        x,
+        y,
+        position,
+        orientation,
+        color,
+        dimensions
+      );
+
+      acc.push(predictedObjectCube);
       return acc;
-    }
-
-    const { label } = classification[0];
-    const color = colorMap[label as keyof typeof colorMap] ?? { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
-
-    const predictedObjectCube: CubePrimitive = createCubePrimitive(x, y, position, orientation, color, dimensions);
-
-    acc.push(predictedObjectCube);
-    return acc;
-  }, []);
+    },
+    []
+  );
 
   return createSceneUpdateMessage(header, spherePrimitives, cubePrimitives);
 }
 
+function convertTrajectory(msg: Trajectory): PosesInFrame {
+  const frame_id = msg.header.frame_id;
+  const timestamp = msg.header.stamp;
+  const points = msg.points;
+
+  const poses: Pose[] = [];
+
+  for (let i = 0; i < points.length; i++) {
+    poses.push({
+      position: {
+        x: points[i]?.pose.position.x || 0.0,
+        y: points[i]?.pose.position.y || 0.0,
+        z: points[i]?.pose.position.z || 0.0,
+      },
+      orientation: {
+        y: points[i]?.pose.orientation.y || 0.0,
+        z: points[i]?.pose.orientation.z || 0.0,
+        x: points[i]?.pose.orientation.x || 0.0,
+        w: points[i]?.pose.orientation.w || 0.0,
+      },
+    });
+  }
+
+  return {
+    frame_id,
+    timestamp,
+    poses,
+  };
+}
 
 export function activate(extensionContext: ExtensionContext): void {
   extensionContext.registerMessageConverter({
@@ -242,5 +336,10 @@ export function activate(extensionContext: ExtensionContext): void {
     fromSchemaName: "autoware_perception_msgs/msg/DetectedObjects",
     toSchemaName: "foxglove.SceneUpdate",
     converter: convertDetectedObjects,
+  });
+  extensionContext.registerMessageConverter({
+    fromSchemaName: "autoware_planning_msgs/msg/Trajectory",
+    toSchemaName: "foxglove.PosesInFrame",
+    converter: convertTrajectory,
   });
 }
