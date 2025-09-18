@@ -61,11 +61,11 @@ function createSceneUpdateMessage(header: Header, spheres: SpherePrimitive[], cu
   };
 }
 
-function createCubePrimitive(x: number, y:number, position: Position, orientation: Orientation, color: Color, dimensions: Dimensions): CubePrimitive
+function createCubePrimitive(x: number, y:number, z:number, position: Position, orientation: Orientation, color: Color, dimensions: Dimensions): CubePrimitive
 {
   return {
     color,
-    size: { x, y, z: 0.1 },
+    size: { x, y, z },
     pose: {
       position: {
         x: position.x,
@@ -87,7 +87,7 @@ function convertDetectedObjects(msg: DetectedObjects): SceneUpdate
     const { pose_with_covariance } = kinematics;
     const { position, orientation } = pose_with_covariance.pose;
     const { dimensions } = shape;
-    const { x, y } = dimensions;
+    const { x, y, z } = dimensions;
 
     if (
       classification.length === 0 ||
@@ -100,7 +100,7 @@ function convertDetectedObjects(msg: DetectedObjects): SceneUpdate
     const { label } = classification[0];
     const color = colorMap[label as keyof typeof colorMap] ?? { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
 
-    const predictedObjectCube: CubePrimitive = createCubePrimitive(x, y, position, orientation, color, dimensions);
+    const predictedObjectCube: CubePrimitive = createCubePrimitive(x, y, z, position, orientation, color, dimensions);
 
     acc.push(predictedObjectCube);
     return acc;
@@ -118,7 +118,7 @@ function convertTrackedObjects(msg: TrackedObjects): SceneUpdate
     const { pose_with_covariance } = kinematics;
     const { position, orientation } = pose_with_covariance.pose;
     const { dimensions } = shape;
-    const { x, y } = dimensions;
+    const { x, y, z } = dimensions;
 
     if (
       classification.length === 0 ||
@@ -131,7 +131,7 @@ function convertTrackedObjects(msg: TrackedObjects): SceneUpdate
     const { label } = classification[0];
     const color = colorMap[label as keyof typeof colorMap] ?? { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
 
-    const predictedObjectCube: CubePrimitive = createCubePrimitive(x, y, position, orientation, color, dimensions);
+    const predictedObjectCube: CubePrimitive = createCubePrimitive(x, y, z, position, orientation, color, dimensions);
 
     acc.push(predictedObjectCube);
     return acc;
@@ -187,7 +187,7 @@ function convertPredictedObjects(msg: PredictedObjects): SceneUpdate
     const { initial_pose_with_covariance } = kinematics;
     const { position, orientation } = initial_pose_with_covariance.pose;
     const { dimensions } = shape;
-    const { x, y } = dimensions;
+    const { x, y, z } = dimensions;
 
     if (
       classification.length === 0 ||
@@ -200,7 +200,7 @@ function convertPredictedObjects(msg: PredictedObjects): SceneUpdate
     const { label } = classification[0];
     const color = colorMap[label as keyof typeof colorMap] ?? { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
 
-    const predictedObjectCube: CubePrimitive = createCubePrimitive(x, y, position, orientation, color, dimensions);
+    const predictedObjectCube: CubePrimitive = createCubePrimitive(x, y, z, position, orientation, color, dimensions);
 
     acc.push(predictedObjectCube);
     return acc;
