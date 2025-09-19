@@ -2,7 +2,6 @@ import { CubePrimitive, SceneUpdate, SpherePrimitive, ImageAnnotations, PointsAn
 import { Header } from "./Header";
 import { Position } from "./Position";
 import { Orientation } from "./Orientation";
-import { Dimensions } from "./Dimensions";
 import { PredictedObjects } from "./PredictedObjects";
 import { TrackedObjects } from "./TrackedObjects";
 import { DetectedObjects } from "./DetectedObjects";
@@ -82,7 +81,7 @@ function createSceneUpdateMessage(header: Header, spheres: SpherePrimitive[], cu
   };
 }
 
-function createCubePrimitive(x: number, y:number, z:number, position: Position, orientation: Orientation, color: Color, dimensions: Dimensions): CubePrimitive
+function createCubePrimitive(x: number, y:number, z:number, position: Position, orientation: Orientation, color: Color): CubePrimitive
 {
   return {
     color,
@@ -120,7 +119,7 @@ function convertDetectedObjects(msg: DetectedObjects): SceneUpdate
     const { label } = classification[0];
     const color = colorMap[label as keyof typeof colorMap] ?? { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
 
-    const predictedObjectCube: CubePrimitive = createCubePrimitive(x, y, z, position, orientation, color, dimensions);
+    const predictedObjectCube: CubePrimitive = createCubePrimitive(x, y, z, position, orientation, color);
 
     acc.push(predictedObjectCube);
     return acc;
@@ -151,7 +150,7 @@ function convertTrackedObjects(msg: TrackedObjects): SceneUpdate
     const { label } = classification[0];
     const color = colorMap[label as keyof typeof colorMap] ?? { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
 
-    const predictedObjectCube: CubePrimitive = createCubePrimitive(x, y, z, position, orientation, color, dimensions);
+    const predictedObjectCube: CubePrimitive = createCubePrimitive(x, y, z, position, orientation, color);
 
     acc.push(predictedObjectCube);
     return acc;
@@ -220,7 +219,7 @@ function convertPredictedObjects(msg: PredictedObjects): SceneUpdate
     const { label } = classification[0];
     const color = colorMap[label as keyof typeof colorMap] ?? { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
 
-    const predictedObjectCube: CubePrimitive = createCubePrimitive(x, y, z, position, orientation, color, dimensions);
+    const predictedObjectCube: CubePrimitive = createCubePrimitive(x, y, z, position, orientation, color);
 
     acc.push(predictedObjectCube);
     return acc;
