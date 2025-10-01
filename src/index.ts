@@ -17,14 +17,14 @@ type Color = {
 };
 
 const colorMap: Record<number, Color> = {
-  0: { r: 1.0, g: 1.0, b: 1.0, a: 0.3 },      // UNKNOWN  // hex: #FFFFFF
-  1: { r: 0.2, g: 0.55, b: 1.0, a: 0.3 },     // CAR // hex: #338CFF
-  2: { r: 0.1, g: 0.65, b: 1.0, a: 0.3 },     // TRUCK // hex: #1AA6FF
-  3: { r: 0.0, g: 0.75, b: 1.0, a: 0.3 },     // BUS // blue // hex: #00BFFF
-  4: { r: 0.55, g: 0.2, b: 0.0, a: 0.3 },      // BICYCLE // blue // hex: #8C3300
-  5: { r: 0.45, g: 0.05, b: 0.12, a: 0.3 },    // MOTORBIKE // pink // hex: #730D1F
-  6: { r: 1.0, g: 0.75, b: 0.8, a: 0.3 },     // PEDESTRIAN // yellow // hex: #FFBFCC
-  7: { r: 0.2, g: 1.0, b: 0.2, a: 0.3 },    // ANIMAL // green // hex: #33FF33
+  0: { r: 1.0, g: 1.0, b: 1.0, a: 0.5 }, // UNKNOWN // white // hex: #FFFFFF
+  1: { r: 1.0, g: 0.0, b: 0.0, a: 0.5 }, // CAR // red // hex: #FF0000
+  2: { r: 1.0, g: 0.5, b: 0.5, a: 0.5 }, // BICYCLE // pink // hex: #FF8080
+  3: { r: 0.0, g: 0.5, b: 1.0, a: 0.5 }, // BUS // blue // hex: #0080FF
+  4: { r: 0.0, g: 0.5, b: 1.0, a: 0.5 }, // TRUCK // blue // hex: #0080FF
+  5: { r: 1.0, g: 0.5, b: 0.5, a: 0.5 }, // CYCLIST // pink // hex: #FF8080
+  6: { r: 1.0, g: 1.0, b: 0.5, a: 0.5 }, // MOTORCYCLE // yellow // hex: #FFFF80
+  7: { r: 0.75, g: 1.0, b: 0.25, a: 0.5 }, // PEDESTRIAN // green // hex: #BFFF40
 };
 
 const trafficLightColorMap: Record<number, Color> = {
