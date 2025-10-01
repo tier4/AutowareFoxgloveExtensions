@@ -10,6 +10,10 @@ Currently supported message types:
 - [autoware_perception_msgs::msg::TrackedObjects](https://github.com/autowarefoundation/autoware_msgs/blob/main/autoware_perception_msgs/msg/TrackedObjects.msg)
 - [autoware_perception_msgs::msg::PredictedObjects](https://github.com/autowarefoundation/autoware_msgs/blob/main/autoware_perception_msgs/msg/PredictedObjects.msg)
 
+For camera-based detection, these topics are now supported to visualize 2D bounding boxes in image panels:
+- [tier4_perception_msgs::msg::DetectedObjectsWithFeature](https://github.com/tier4/tier4_autoware_msgs/blob/tier4/universe/tier4_perception_msgs/msg/object_recognition/DetectedObjectsWithFeature.msg)
+- [tier4_perception_msgs::msg::TrafficLightRoiArray](https://github.com/tier4/tier4_autoware_msgs/blob/tier4/universe/tier4_perception_msgs/msg/traffic_light/TrafficLightRoiArray.msg)
+
 Note that this repository may not be maintained and thus the destructive changes on the above ROS 2 messages may not be reflected here.
 
 ## _A Foxglove Studio Extension_
