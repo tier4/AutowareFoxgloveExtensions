@@ -1,5 +1,13 @@
 # AutowareFoxgloveConverter version history
 
+## 0.1.2
+
+- Added support for:
+  - [tier4_perception_msgs::msg::DetectedObjectsWithFeature](https://github.com/tier4/tier4_autoware_msgs/blob/tier4/universe/tier4_perception_msgs/msg/object_recognition/DetectedObjectsWithFeature.msg)
+  - [tier4_perception_msgs::msg::TrafficLightRoiArray](https://github.com/tier4/tier4_autoware_msgs/blob/tier4/universe/tier4_perception_msgs/msg/traffic_light/TrafficLightRoiArray.msg)
+- Added height to 3D bounding box messages
+- Adjusted color mapping for consistency with other plugins
+
 ## 0.1.1
 
 - Packaging system updates
