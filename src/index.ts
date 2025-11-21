@@ -90,7 +90,7 @@ function createCubePrimitive(x: number, y:number, z:number, position: Position, 
       position: {
         x: position.x,
         y: position.y,
-        z: position.z - 0.5 * z,
+        z: position.z,
       },
       orientation,
     },
