@@ -26,6 +26,10 @@ const colorMap: Record<number, Color> = {
   5: { r: 1.0, g: 1.0, b: 0.5, a: 0.5 }, // MOTORCYCLE // yellow // hex: #FFFF80
   6: { r: 1.0, g: 0.5, b: 0.5, a: 0.5 }, // BICYCLE // pink // hex: #FF8080
   7: { r: 0.75, g: 1.0, b: 0.25, a: 0.5 }, // PEDESTRIAN // green // hex: #BFFF40
+  8: { r: 1.0, g: 0.5, b: 0.0, a: 0.5 }, // ANIMAL // orange // hex: #FF8000
+  9: { r: 1.0, g: 0.0, b: 1.0, a: 0.5 }, // HAZARD // magenta // hex: #FF00FF
+  10: { r: 0.0, g: 1.0, b: 1.0, a: 0.5 }, // OVER_DRIVABLE // cyan // hex: #00FFFF
+  11: { r: 0.5, g: 0.25, b: 1.0, a: 0.5 }, // UNDER_DRIVABLE // purple // hex: #8040FF
 };
 
 const trafficLightColorMap: Record<number, Color> = {
