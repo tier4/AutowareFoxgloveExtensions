@@ -16,15 +16,20 @@ type Color = {
   a: number;
 };
 
+// Label numbering follows autoware_perception_msgs/ObjectClassification.msg.
 const colorMap: Record<number, Color> = {
   0: { r: 1.0, g: 1.0, b: 1.0, a: 0.5 }, // UNKNOWN // white // hex: #FFFFFF
   1: { r: 1.0, g: 0.0, b: 0.0, a: 0.5 }, // CAR // red // hex: #FF0000
-  2: { r: 1.0, g: 0.5, b: 0.5, a: 0.5 }, // BICYCLE // pink // hex: #FF8080
+  2: { r: 0.0, g: 0.5, b: 1.0, a: 0.5 }, // TRUCK // blue // hex: #0080FF
   3: { r: 0.0, g: 0.5, b: 1.0, a: 0.5 }, // BUS // blue // hex: #0080FF
-  4: { r: 0.0, g: 0.5, b: 1.0, a: 0.5 }, // TRUCK // blue // hex: #0080FF
-  5: { r: 1.0, g: 0.5, b: 0.5, a: 0.5 }, // CYCLIST // pink // hex: #FF8080
-  6: { r: 1.0, g: 1.0, b: 0.5, a: 0.5 }, // MOTORCYCLE // yellow // hex: #FFFF80
+  4: { r: 0.0, g: 0.5, b: 1.0, a: 0.5 }, // TRAILER // blue // hex: #0080FF
+  5: { r: 1.0, g: 1.0, b: 0.5, a: 0.5 }, // MOTORCYCLE // yellow // hex: #FFFF80
+  6: { r: 1.0, g: 0.5, b: 0.5, a: 0.5 }, // BICYCLE // pink // hex: #FF8080
   7: { r: 0.75, g: 1.0, b: 0.25, a: 0.5 }, // PEDESTRIAN // green // hex: #BFFF40
+  8: { r: 1.0, g: 0.5, b: 0.0, a: 0.5 }, // ANIMAL // orange // hex: #FF8000
+  9: { r: 1.0, g: 0.0, b: 1.0, a: 0.5 }, // HAZARD // magenta // hex: #FF00FF
+  10: { r: 0.0, g: 1.0, b: 1.0, a: 0.5 }, // OVER_DRIVABLE // cyan // hex: #00FFFF
+  11: { r: 0.5, g: 0.25, b: 1.0, a: 0.5 }, // UNDER_DRIVABLE // purple // hex: #8040FF
 };
 
 const trafficLightColorMap: Record<number, Color> = {
@@ -39,21 +44,29 @@ const labelMap: Record<number, string> = {
   1: "CAR",
   2: "TRUCK",
   3: "BUS",
-  4: "BICYCLE",
-  5: "MOTORBIKE",
-  6: "PEDESTRIAN",
-  7: "ANIMAL",
+  4: "TRAILER",
+  5: "MOTORCYCLE",
+  6: "BICYCLE",
+  7: "PEDESTRIAN",
+  8: "ANIMAL",
+  9: "HAZARD",
+  10: "OVER_DRIVABLE",
+  11: "UNDER_DRIVABLE",
 };
 
 enum Classification {
   UNKNOWN = 0,
   CAR = 1,
-  BICYCLE = 2,
+  TRUCK = 2,
   BUS = 3,
-  TRUCK = 4,
-  CYCLIST = 5,
-  MOTORCYCLE = 6,
+  TRAILER = 4,
+  MOTORCYCLE = 5,
+  BICYCLE = 6,
   PEDESTRIAN = 7,
+  ANIMAL = 8,
+  HAZARD = 9,
+  OVER_DRIVABLE = 10,
+  UNDER_DRIVABLE = 11,
 }
 
 // 3D

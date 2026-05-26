@@ -1,5 +1,15 @@
 # AutowareFoxgloveConverter version history
 
+## 0.1.4
+
+- Aligned `ObjectClassification.label` numbering with [autoware_perception_msgs/ObjectClassification.msg](https://github.com/autowarefoundation/autoware_msgs/blob/main/autoware_perception_msgs/msg/ObjectClassification.msg). Previously `TRUCK`, `TRAILER`, `MOTORCYCLE`, and `BICYCLE` were colored/labeled as different classes, and the internal `colorMap` and `labelMap` numbered the same labels differently.
+- Added `TRAILER`, `ANIMAL`, `HAZARD`, `OVER_DRIVABLE`, and `UNDER_DRIVABLE` entries to the label map. Removed the `CYCLIST` label that is not defined by any Autoware message.
+- Assigned dedicated colors to `ANIMAL` (orange), `HAZARD` (magenta), `OVER_DRIVABLE` (cyan), and `UNDER_DRIVABLE` (purple) so they no longer collapse onto the white `UNKNOWN` fallback.
+
+## 0.1.3
+
+- Fixed vertical bounding box position by adding `z/2` offset
+
 ## 0.1.2
 
 - Added support for:
